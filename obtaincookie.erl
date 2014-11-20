@@ -35,8 +35,8 @@ unpad(B) ->
     Size = size(B),
     {_, B2} = split_binary(B, Size - 1),
     [Pad] = binary_to_list(B2),
-    Len = if Pad > 15; Pad =:= 0 -> erlang:error(invalid_pad);
-             true -> Size - Pad %% Pad is between 0 and 16
+    Len = if Pad > 16; Pad =:= 0 -> erlang:error(invalid_pad);
+             true -> Size - Pad %% Pad is between 1 and 16
           end,
     {Bfinal, _} = split_binary(B, Len),
     Bfinal.
