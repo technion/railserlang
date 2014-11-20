@@ -31,18 +31,13 @@ decryptcookie(Cdata) ->
 
 -spec unpad(binary()) -> binary().
 unpad(B) ->
-    %% Removes PKCS 1.5 padding
-    % Liberated from https://raw.githubusercontent.com/joearms/paradis/master/elib2_aes.erl
+    %% Removes PKCS 7 padding
     Size = size(B),
     {_, B2} = split_binary(B, Size - 1),
     [Pad] = binary_to_list(B2),
-    Len = case Pad of
-          0 ->
-          %% the entire last block is padding
-          Size - 16;
-          _ ->
-          Size - Pad
-      end,
+    Len = if Pad > 15; Pad =:= 0 -> erlang:error(invalid_pad);
+             true -> Size - Pad %% Pad is between 0 and 16
+          end,
     {Bfinal, _} = split_binary(B, Len),
     Bfinal.
 
@@ -55,5 +50,5 @@ obtaincookie() ->
     validatehash(Cdata, Hash),
     Plaintext = decryptcookie(Cdata),
     io:fwrite("The good one is ~s~n", [Plaintext]),
-    [Plaintext].
+    binary:bin_to_list(Plaintext).
 
